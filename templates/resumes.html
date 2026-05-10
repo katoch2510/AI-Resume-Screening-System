@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+        <h2 class="fw-bold">Resume Management</h2>
+        <p class="text-muted">Upload resumes and rank them against job descriptions.</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+            <i class="fas fa-upload me-2"></i>Upload New Resume
+        </button>
+    </div>
+</div>
+
+<div class="card p-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Candidate</th>
+                    <th>Resume File</th>
+                    <th>Extracted Skills</th>
+                    <th>Latest Score</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for candidate in candidates %}
+                <tr>
+                    <td>
+                        <div class="fw-bold">{{ candidate.name }}</div>
+                        <small class="text-muted">{{ candidate.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                    </td>
+                    <td><span class="text-primary"><i class="far fa-file-pdf me-1"></i> {{ candidate.resume_filename }}</span></td>
+                    <td>
+                        {% for skill in candidate.extracted_skills.split(',')[:5] %}
+                        <span class="badge bg-light text-dark border">{{ skill }}</span>
+                        {% endfor %}
+                        {% if candidate.extracted_skills.split(',')|length > 5 %}
+                        <small class="text-muted">+{{ candidate.extracted_skills.split(',')|length - 5 }} more</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if candidate.matches %}
+                        {% set latest_match = candidate.matches[-1] %}
+                        <div class="d-flex align-items-center">
+                            <div class="progress w-100 me-2" style="height: 6px;">
+                                <div class="progress-bar {% if latest_match.score > 80 %}bg-success{% elif latest_match.score > 50 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                     style="width: {{ latest_match.score }}%"></div>
+                            </div>
+                            <span class="fw-bold">{{ latest_match.score }}%</span>
+                        </div>
+                        <small class="text-muted">{{ latest_match.job.title }}</small>
+                        {% else %}
+                        <span class="text-muted">No matches</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('candidate_detail', id=candidate.id) }}" class="btn btn-sm btn-outline-primary">View Report</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center py-5">
+                        <p class="text-muted">No resumes uploaded yet.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Upload Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Process New Resume</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" enctype="multipart/form-data">
+                <div class="modal-body p-4">
+                    <div class="mb-4 text-center">
+                        <div class="upload-area border-dashed rounded p-5 bg-light">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                            <p class="mb-0">Drag and drop or click to select</p>
+                            <input type="file" name="resume" class="form-control mt-3" accept=".pdf,.docx" required>
+                            <small class="text-muted d-block mt-2">Supported: PDF, DOCX (Max 16MB)</small>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Select Job Opening to Match</label>
+                        <select name="job_id" class="form-select" required>
+                            <option value="" disabled selected>Choose a job...</option>
+                            {% for job in jobs %}
+                            <option value="{{ job.id }}">{{ job.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4">Start Analysis</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+        <h2 class="fw-bold">Job Openings</h2>
+        <p class="text-muted">Manage your job descriptions and requirements.</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addJobModal">
+            <i class="fas fa-plus me-2"></i>Add New Job
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    {% for job in jobs %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <h5 class="fw-bold mb-0 text-primary">{{ job.title }}</h5>
+                    <a href="{{ url_for('delete_job', id=job.id) }}" class="text-danger" onclick="return confirm('Delete this job?')">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+                <p class="card-text text-muted small" style="display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;">
+                    {{ job.description }}
+                </p>
+                <div class="mt-4 d-flex justify-content-between align-items-center">
+                    <small class="text-muted"><i class="far fa-calendar-alt me-1"></i> {{ job.created_at.strftime('%Y-%m-%d') }}</small>
+                    <span class="badge bg-light text-dark">{{ job.matches|length }} Candidates</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <img src="https://illustrations.popsy.co/gray/work-from-home.svg" style="width: 200px;" alt="No Jobs">
+        <h5 class="mt-4 text-muted">No jobs added yet.</h5>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Add Job Modal -->
+<div class="modal fade" id="addJobModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Add Job Description</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Job Title</label>
+                        <input type="text" name="title" class="form-control" placeholder="e.g. Senior Python Developer" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Detailed Job Description</label>
+                        <textarea name="description" class="form-control" rows="8" placeholder="Paste requirements, skills, and responsibilities here..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4">Create Job</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

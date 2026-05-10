@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <a href="{{ url_for('resumes') }}" class="btn btn-sm btn-light mb-3"><i class="fas fa-arrow-left me-1"></i> Back to Resumes</a>
+        <h2 class="fw-bold">{{ candidate.name }}</h2>
+        <p class="text-muted"><i class="far fa-file-pdf me-1"></i> {{ candidate.resume_filename }} | Processed on {{ candidate.created_at.strftime('%B %d, %Y') }}</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <button class="btn btn-outline-primary me-2"><i class="fas fa-download"></i> Download Report</button>
+        <button class="btn btn-primary"><i class="fas fa-share-alt"></i> Share</button>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Left Column: Score and Skills -->
+    <div class="col-md-4">
+        <div class="card p-4 mb-4 text-center">
+            <h5 class="fw-bold mb-4">Overall Compatibility</h5>
+            {% set latest_match = matches[-1] if matches else None %}
+            {% if latest_match %}
+            <div class="position-relative d-inline-block">
+                <h1 class="display-3 fw-bold text-primary mb-0">{{ latest_match.score }}%</h1>
+                <p class="text-muted">Matched for: <strong>{{ latest_match.job.title }}</strong></p>
+            </div>
+            <div class="progress mt-3" style="height: 10px;">
+                <div class="progress-bar bg-primary" style="width: {{ latest_match.score }}%"></div>
+            </div>
+            {% else %}
+            <p class="text-muted">No matching score available.</p>
+            {% endif %}
+        </div>
+
+        <div class="card p-4 mb-4">
+            <h5 class="fw-bold mb-4">Extracted Skills</h5>
+            <div class="d-flex flex-wrap gap-2">
+                {% for skill in candidate.extracted_skills.split(',') %}
+                <span class="badge bg-soft-primary text-primary px-3 py-2" style="background-color: #eef2ff;">{{ skill }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: AI Insights -->
+    <div class="col-md-8">
+        {% if latest_match %}
+        <div class="card p-4 mb-4 border-start border-primary border-4">
+            <h5 class="fw-bold mb-3 text-primary"><i class="fas fa-lightbulb me-2"></i> AI Skill Gap Analysis</h5>
+            <p class="text-muted small mb-4">The following skills were found in the job description but are missing from the candidate's resume.</p>
+            
+            {% if latest_match.suggestions %}
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                {% for suggestion in latest_match.suggestions.split(',') %}
+                <span class="badge bg-soft-danger text-danger px-3 py-2" style="background-color: #fef2f2;">{{ suggestion }}</span>
+                {% endfor %}
+            </div>
+            <div class="alert alert-warning small border-0">
+                <strong>Pro Tip:</strong> Consider asking the candidate if they have experience in these areas during the interview.
+            </div>
+            {% else %}
+            <div class="alert alert-success small border-0">
+                <i class="fas fa-check-circle me-1"></i> Perfect Match! No major skill gaps detected.
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="card p-4 mb-4">
+            <h5 class="fw-bold mb-4"><i class="fas fa-comments me-2"></i> Suggested Interview Questions</h5>
+            <div class="list-group list-group-flush">
+                {% set questions = latest_match.interview_questions|from_json if latest_match.interview_questions else [] %}
+                {% for q in questions %}
+                <div class="list-group-item px-0 border-0 mb-3">
+                    <div class="d-flex">
+                        <div class="me-3 text-primary"><i class="fas fa-question-circle"></i></div>
+                        <div>{{ q }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card p-0 mb-4 overflow-hidden">
+            <div class="card-header bg-white border-0 p-4 pb-0">
+                <h5 class="fw-bold mb-0">Resume Preview (Extracted Text)</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="bg-light p-4 rounded small" style="max-height: 400px; overflow-y: auto; white-space: pre-wrap;">
+{{ candidate.raw_text }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Custom filter for JSON parsing
+    // In app.py we'll need to add: app.jinja_env.filters['from_json'] = json.loads
+</script>
+{% endblock %}

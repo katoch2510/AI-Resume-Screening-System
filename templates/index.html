@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="fw-bold">Dashboard Overview</h2>
+        <p class="text-muted">Welcome back, Admin. Here is what's happening today.</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card p-4 stats-card bg-primary text-white">
+            <h6 class="text-uppercase mb-2">Total Jobs</h6>
+            <h2 class="fw-bold mb-0">{{ total_jobs }}</h2>
+            <i class="fas fa-briefcase"></i>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-4 stats-card bg-success text-white">
+            <h6 class="text-uppercase mb-2">Resumes Processed</h6>
+            <h2 class="fw-bold mb-0">{{ total_candidates }}</h2>
+            <i class="fas fa-file-invoice"></i>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-4 stats-card bg-info text-white">
+            <h6 class="text-uppercase mb-2">Avg Match Score</h6>
+            <h2 class="fw-bold mb-0">72%</h2>
+            <i class="fas fa-chart-line"></i>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0">Top Ranked Candidates</h5>
+                <a href="{{ url_for('resumes') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Candidate</th>
+                            <th>Job Role</th>
+                            <th>Score</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for match in recent_matches %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar me-3 bg-light rounded-circle p-2"><i class="fas fa-user text-primary"></i></div>
+                                    <div>
+                                        <div class="fw-bold">{{ match.candidate.name }}</div>
+                                        <small class="text-muted">{{ match.candidate.resume_filename }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ match.job.title }}</td>
+                            <td>
+                                <span class="badge {% if match.score > 80 %}bg-success{% elif match.score > 50 %}bg-warning{% else %}bg-danger{% endif %} rounded-pill">
+                                    {{ match.score }}%
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('candidate_detail', id=match.candidate.id) }}" class="btn btn-sm btn-light">Details</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-4 h-100">
+            <h5 class="fw-bold mb-4">Match Distribution</h5>
+            <canvas id="matchDistributionChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
