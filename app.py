@@ -16,9 +16,17 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev_key')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///database.db')
+
+# Vercel Compatibility: Use /tmp for writable files
+IS_VERCEL = os.environ.get('VERCEL') == '1'
+if IS_VERCEL:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/database.db'
+    app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///database.db')
+    app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', 'uploads')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_CONTENT_LENGTH', 16 * 1024 * 1024))
 
 # Ensure upload folder exists
