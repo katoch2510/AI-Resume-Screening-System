@@ -10,3 +10,5 @@ uploads/*
 !uploads/.gitkeep
 *.db
 *.sqlite3
+
+.vercel

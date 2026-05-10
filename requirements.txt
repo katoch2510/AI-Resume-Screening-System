@@ -4,9 +4,7 @@ flask-login
 python-dotenv
 PyPDF2
 python-docx
-spacy
 nltk
 scikit-learn
 pandas
-matplotlib
 Werkzeug
