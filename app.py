@@ -45,9 +45,35 @@ app.jinja_env.filters['from_json'] = json.loads
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+def seed_jobs():
+    """Seed the database with initial job listings if they don't exist."""
+    default_jobs = [
+        {"title": "Full Stack Developer", "description": "We are looking for a Full Stack Developer proficient in Python, Flask, React, and SQL. Experience with REST APIs and cloud deployment is a plus."},
+        {"title": "Data Scientist", "description": "Seeking a Data Scientist with strong skills in Python, Pandas, Scikit-learn, and Machine Learning. Experience with data visualization and SQL is required."},
+        {"title": "Frontend Developer", "description": "Looking for a Frontend Developer with expertise in React, Javascript, HTML, and CSS. Experience with modern UI frameworks like Tailwind or Bootstrap is preferred."},
+        {"title": "Backend Developer", "description": "We need a Backend Developer specialized in Python and Django/Flask. Strong knowledge of database design, Redis, and microservices is expected."},
+        {"title": "UI/UX Designer", "description": "Creative UI/UX Designer wanted to lead user research, wireframing, and high-fidelity prototyping using Figma or Adobe XD."},
+        {"title": "DevOps Engineer", "description": "DevOps Engineer needed to manage CI/CD pipelines, Docker, Kubernetes, and AWS infrastructure. Knowledge of Terraform and Ansible is a plus."},
+        {"title": "Product Manager", "description": "Seeking a Product Manager with experience in Agile, Scrum, and product roadmap planning. Excellent communication and leadership skills are essential."},
+        {"title": "Machine Learning Engineer", "description": "Machine Learning Engineer with focus on TensorFlow, PyTorch, and deploying AI models at scale. Experience with NLP or Computer Vision is a plus."},
+        {"title": "Content Writer", "description": "Content Writer to create high-quality blogs, articles, and marketing copy. Knowledge of SEO, content strategy, and social media management is preferred."},
+        {"title": "QA Automation Engineer", "description": "QA Engineer to build automated test suites using Selenium or PyTest. Focus on ensuring software quality through rigorous testing."},
+        {"title": "Marketing Specialist", "description": "Digital Marketing Specialist to handle SEO, SEM, and social media campaigns. Data-driven approach to marketing and lead generation is required."},
+        {"title": "HR Manager", "description": "Experienced HR Manager to handle recruitment, employee relations, and company culture. Strong interpersonal and organizational skills are a must."}
+    ]
+    
+    for job_data in default_jobs:
+        if not Job.query.filter_by(title=job_data["title"]).first():
+            job = Job(title=job_data["title"], description=job_data["description"])
+            db.session.add(job)
+    
+    db.session.commit()
+    print("Default jobs checked/seeded successfully!")
+
 # --- Database Initialization ---
 with app.app_context():
     db.create_all()
+    seed_jobs()
     # Create default admin if not exists
     if not User.query.filter_by(username='admin').first():
         hashed_password = generate_password_hash('admin123', method='pbkdf2:sha256')
