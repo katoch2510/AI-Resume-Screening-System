@@ -209,9 +209,15 @@ def resumes():
 @app.route('/candidate/<int:id>')
 @login_required
 def candidate_detail(id):
-    candidate = Candidate.query.get_or_404(id)
-    matches = MatchScore.query.filter_by(candidate_id=id).all()
-    return render_template('candidate_detail.html', candidate=candidate, matches=matches)
+    try:
+        candidate = Candidate.query.get_or_404(id)
+        # Order matches by ID descending to get the most recent one first if needed, 
+        # though template uses [-1] on all()
+        matches = MatchScore.query.filter_by(candidate_id=id).order_by(MatchScore.id.asc()).all()
+        return render_template('candidate_detail.html', candidate=candidate, matches=matches)
+    except Exception as e:
+        flash(f"Error loading candidate report: {str(e)}")
+        return redirect(url_for('resumes'))
 
 if __name__ == '__main__':
     app.run(debug=True)

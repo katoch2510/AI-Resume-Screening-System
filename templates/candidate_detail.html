@@ -35,9 +35,15 @@
         <div class="card p-4 mb-4">
             <h5 class="fw-bold mb-4">Extracted Skills</h5>
             <div class="d-flex flex-wrap gap-2">
-                {% for skill in candidate.extracted_skills.split(',') %}
-                <span class="badge bg-soft-primary text-primary px-3 py-2" style="background-color: #eef2ff;">{{ skill }}</span>
-                {% endfor %}
+                {% if candidate.extracted_skills %}
+                    {% for skill in candidate.extracted_skills.split(',') %}
+                        {% if skill.strip() %}
+                            <span class="badge bg-soft-primary text-primary px-3 py-2" style="background-color: #eef2ff;">{{ skill.strip() }}</span>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted small">No skills extracted.</p>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -69,14 +75,18 @@
             <h5 class="fw-bold mb-4"><i class="fas fa-comments me-2"></i> Suggested Interview Questions</h5>
             <div class="list-group list-group-flush">
                 {% set questions = latest_match.interview_questions|from_json if latest_match.interview_questions else [] %}
-                {% for q in questions %}
-                <div class="list-group-item px-0 border-0 mb-3">
-                    <div class="d-flex">
-                        <div class="me-3 text-primary"><i class="fas fa-question-circle"></i></div>
-                        <div>{{ q }}</div>
+                {% if questions and questions is iterable %}
+                    {% for q in questions %}
+                    <div class="list-group-item px-0 border-0 mb-3">
+                        <div class="d-flex">
+                            <div class="me-3 text-primary"><i class="fas fa-question-circle"></i></div>
+                            <div>{{ q }}</div>
+                        </div>
                     </div>
-                </div>
-                {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted small">No interview questions generated.</p>
+                {% endif %}
             </div>
         </div>
         {% endif %}
